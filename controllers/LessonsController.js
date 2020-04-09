@@ -1,4 +1,4 @@
-const Lesson = require("../models/Lesson");
+import Lesson from '../models/Lesson';
 
 class LessonsController {
     constructor(model) {
@@ -10,6 +10,9 @@ class LessonsController {
      * @param {*} res 
      */
     index(req, res) {
+        res
+            .status(200)
+            .json(this.model.findall());
     }
 
     /**
@@ -18,7 +21,12 @@ class LessonsController {
      * @param {*} res 
      */
     create(req, res) {
+        if (!this.validate(req.body)) {
+            return res.status(400).json({message: "Lesson 'name' is required in the request body."});
+        }
+        const lesson = this.model.create(req.body)
 
+        return res.status(200).json(lesson);
     }
 
     /**
@@ -27,7 +35,11 @@ class LessonsController {
      * @param {*} res 
      */
     show(req, res) {
-
+        if (!parseInt(req.params.id)) return res.status(400).json({message: "No 'id' found in the request params."});
+        const lesson = this.model.findone(req.params.id) || {}
+        return res
+                .status(200)
+                .json(lesson);
     }
 
     /**
@@ -36,7 +48,14 @@ class LessonsController {
      * @param {*} res 
      */
     update(req, res) {
+        if (!parseInt(req.params.id)) return res.status(400).json({message: "No 'id' found in the request params."});
+        if (!this.validate(req.body)) {
+            return res.status(400).json({message: "Lesson 'name' is required in the request body."});
+        }
 
+        const updatedLesson = this.model.update(req.params.id, req.body);
+
+        return res.status(200).json(updatedLesson);
     }
     
     /**
@@ -45,8 +64,18 @@ class LessonsController {
      * @param {*} res 
      */
     delete(req, res) {
+        if (!req.params.id) return res.status(400).json({message: "No 'id' found in the request params."});
+        
+        const deletedId = this.model.delete(req.params.id);
 
+        return res.status(200).json({id: deletedId});
+    }
+
+    validate(body) {
+        if (!body.name) return false
+        else if (body.name && !body.name.trim()) return false
+        else return true;
     }
 }
 
-module.exports = new LessonsController(Lesson);
+export default new LessonsController(new Lesson());

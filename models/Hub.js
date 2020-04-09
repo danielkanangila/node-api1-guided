@@ -1,6 +1,6 @@
-
-class Hub {
-
+import Database from '../database/Database';
+export default class Hub extends Database {
+    constructor() {
+        super()
+    }
 }
-
-module.exports = new Hub();
